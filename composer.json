@@ -15,7 +15,7 @@
     }
   ],
   "version": "1.0.0",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "require": {
     "php": ">=5.5",
     "ext-phalcon": "^3.0"
