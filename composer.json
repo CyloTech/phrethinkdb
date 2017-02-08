@@ -1,0 +1,28 @@
+{
+  "name": "cylo/phrethinkdb",
+  "description": "phalcon RethinkDB adapter",
+  "homepage": "https://github.com/CyloTech/phrethinkdb",
+  "authors": [
+    {
+      "name": "Grant Millar",
+      "email": "grant@cylo.io",
+      "role": "Developer"
+    },
+    {
+      "name": "Gavin Hanson",
+      "email": "gavin@cylo.io",
+      "role": "Developer"
+    }
+  ],
+  "version": "1.0.0",
+  "license": "Apache 2.0",
+  "require": {
+    "php": ">=5.5",
+    "ext-phalcon": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Phalcon\\": "src/"
+    }
+  }
+}
