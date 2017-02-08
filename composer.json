@@ -18,7 +18,8 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=5.5",
-    "ext-phalcon": "^3.0"
+    "ext-phalcon": "^3.0",
+    "danielmewes/php-rql": "dev-master"
   },
   "autoload": {
     "psr-4": {
