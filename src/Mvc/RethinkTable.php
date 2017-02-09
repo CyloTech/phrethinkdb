@@ -93,18 +93,18 @@ abstract class RethinkTable extends \Phalcon\Mvc\Collection
         }
 
         $data = $this->toArray();
-
+die();
         /**
          * We always use safe stores to get the success state
          * Save the document
          */
         switch ($this->_operationMade) {
             case self::OP_CREATE:
-                $status = $table->insertOne($data);
+                $insertedId = $table->insertOne($data);
                 break;
 
             case self::OP_UPDATE:
-                $status = $table->updateOne(['id' => $this->id], ['$set' => $this->toArray()]);
+                $insertedId = $table->updateOne(['id' => $this->id], ['$set' => $this->toArray()]);
                 break;
 
             default:
@@ -113,11 +113,11 @@ abstract class RethinkTable extends \Phalcon\Mvc\Collection
 
         $success = false;
 
-        if ($status->isAcknowledged()) {
+        if ($insertedId) {
             $success = true;
 
             if (false === $exists) {
-                $this->id = $status->getInsertedId();
+                $this->id = $insertedId;
             }
         }
 
@@ -162,6 +162,24 @@ abstract class RethinkTable extends \Phalcon\Mvc\Collection
      * @return array
      */
     public static function findFirst(array $parameters = null)
+    {
+        $className = get_called_class();
+
+        /** @var RethinkdbCollection $collection */
+        $collection = new $className();
+
+        $connection = $collection->getConnection();
+
+        return static::_getResultset($parameters, $collection, $connection, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param  array|null $parameters
+     * @return array
+     */
+    public static function find(array $parameters = null)
     {
         $className = get_called_class();
 
@@ -424,21 +442,6 @@ abstract class RethinkTable extends \Phalcon\Mvc\Collection
         }
 
         return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @todo
-     * @param string $field
-     * @param null $conditions
-     * @param null $finalize
-     *
-     * @throws Exception
-     */
-    public static function summatory($field, $conditions = null, $finalize = null)
-    {
-        throw new Exception('The summatory() method is not implemented in the new Mvc RethinkdbCollection');
     }
 
     /**
