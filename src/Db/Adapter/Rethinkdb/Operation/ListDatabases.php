@@ -40,7 +40,7 @@ class ListDatabases implements Executable
         try {
             $result = r\dbList()->run($manager);
         } catch (\Exception $e) {
-            throw new \Exception('Error: $e');
+            throw new \Exception("Error: $e");
         }
 
         return $result;

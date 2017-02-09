@@ -44,7 +44,7 @@ class DropDatabase implements Executable
         try {
             $result = r\dbDrop($this->databaseName)->run($manager);
         } catch (\Exception $e) {
-            throw new \Exception('Error: $e');
+            throw new \Exception("Error: $e");
         }
 
         return $result;
