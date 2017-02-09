@@ -20,12 +20,11 @@ class Client
      *
      * @param string $host
      * @param string $port
-     * @param string $dbname
      *
      */
-    public function __construct($host = 'localhost', $port = '28015', $dbname = '')
+    public function __construct($host = 'localhost', $port = '28015')
     {
-        $this->manager = r\connect($host, $port, $dbname);
+        $this->manager = r\connect($host, $port);
     }
 
     /**
@@ -113,8 +112,6 @@ class Client
      */
     public function selectTable($databaseName, $tableName, array $options = [])
     {
-        $options+=['typeMap'=>$this->typeMap];
-
         return new Table($this->manager, $databaseName, $tableName, $options);
     }
 
@@ -130,8 +127,6 @@ class Client
      */
     public function selectDatabase($databaseName, array $options = [])
     {
-        $options+=['typeMap'=>$this->typeMap];
-
         return new Database($this->manager, $databaseName, $options);
     }
 }

@@ -108,24 +108,15 @@ class Table
      * Gets the number of documents matching the filter.
      *
      * @param array|object $filter Query by which to filter documents
-     * @param array        $options Command options
-     *
-     * @return integer
+     * @param Table $table
+     * @param array $options Command options
+     * @return int
      */
-    public function count($filter = [], array $options = [])
+    public function count(array $filter = [], array $options = [])
     {
-        if (!isset($options['readConcern'])) {
-            $options['readConcern']=$this->readConcern;
-        }
+        $operation=new Operation\Count($this->tableName, $filter, $options);
 
-        if (!isset($options['readPreference'])) {
-            $options['readPreference']=$this->readPreference;
-        }
-
-        $operation=new Operation\Count($this->databaseName, $this->tableName, $filter, $options);
-        $server   =$this->manager->selectServer($options['readPreference']);
-
-        return $operation->execute($server);
+        return $operation->execute($this->manager);
     }
 
     /**

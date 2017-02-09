@@ -11,12 +11,12 @@ use Phalcon\Mvc\Collection as PhalconCollection;
 use Phalcon\Db\Adapter\RethinkDB\Table as AdapterCollection;
 
 /**
- * Class RethinkdbCollection
+ * Class RethinkTable
  *
  * @property  \Phalcon\Mvc\Collection\ManagerInterface _modelsManager
  * @package Phalcon\Mvc
  */
-abstract class RethinkdbCollection extends PhalconCollection implements Unserializable
+abstract class RethinkTable extends \Phalcon\Mvc\Collection
 {
     // @codingStandardsIgnoreStart
     static protected $_disableEvents;
@@ -30,16 +30,16 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
     public function setId($id)
     {
         if (is_object($id)) {
-            $this->_id = $id;
+            $this->id = $id;
             return;
         }
 
         if ($this->_modelsManager->isUsingImplicitObjectIds($this)) {
-            $this->_id = new ObjectID($id);
+            $this->id = new ObjectID($id);
             return;
         }
 
-        $this->_id = $id;
+        $this->id = $id;
     }
 
     /**
@@ -51,6 +51,7 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
      */
     public function save()
     {
+
         $dependencyInjector = $this->_dependencyInjector;
 
         if (!is_object($dependencyInjector)) {
@@ -65,11 +66,11 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
             throw new Exception("Method getSource() returns empty string");
         }
 
-        $connection = $this->getConnection();
+        $connection = $this->getDI()->get('rethink');
 
-        $collection = $connection->selectCollection($source);
+        $table = $connection->selectTable($source);
 
-        $exists = $this->_exists($collection);
+        $exists = $this->_exists($table);
 
         if (false === $exists) {
             $this->_operationMade = self::OP_CREATE;
@@ -99,11 +100,11 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
          */
         switch ($this->_operationMade) {
             case self::OP_CREATE:
-                $status = $collection->insertOne($data);
+                $status = $table->insertOne($data);
                 break;
 
             case self::OP_UPDATE:
-                $status = $collection->updateOne(['_id' => $this->_id], ['$set' => $this->toArray()]);
+                $status = $table->updateOne(['id' => $this->id], ['$set' => $this->toArray()]);
                 break;
 
             default:
@@ -116,9 +117,11 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
             $success = true;
 
             if (false === $exists) {
-                $this->_id = $status->getInsertedId();
+                $this->id = $status->getInsertedId();
             }
         }
+
+
 
         /**
          * Call the postSave hooks
@@ -149,7 +152,7 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
             $mongoId = $id;
         }
 
-        return static::findFirst([["_id" => $mongoId]]);
+        return static::findFirst([["id" => $mongoId]]);
     }
 
     /**
@@ -320,7 +323,7 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
      */
     public function delete()
     {
-        if (!$id = $this->_id) {
+        if (!$id = $this->id) {
             throw new Exception("The document cannot be deleted because it doesn't exist");
         }
 
@@ -365,7 +368,7 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
         /**
          * Remove the instance
          */
-        $status = $collection->deleteOne(['_id' => $mongoId], ['w' => true]);
+        $status = $collection->deleteOne(['id' => $mongoId], ['w' => true]);
 
         if ($status->isAcknowledged()) {
             $success = true;
@@ -379,34 +382,21 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
     /**
      * {@inheritdoc}
      *
-     * @param  \RethinkdbCollection $collection
+     * @param  RethinkTable $table
      * @return boolean
      * @codingStandardsIgnoreStart
      */
-    protected function _exists($collection)
+    protected function _exists($table)
     {
         // @codingStandardsIgnoreStart
-        if (!$id = $this->_id) {
+        if (!$id = $this->id) {
             return false;
-        }
-
-        if (is_object($id)) {
-            $mongoId = $id;
-        } else {
-            /**
-             * Check if the model use implicit ids
-             */
-            if ($this->_modelsManager->isUsingImplicitObjectIds($this)) {
-                $mongoId = new ObjectID($id);
-            } else {
-                $mongoId = $id;
-            }
         }
 
         /**
          * Perform the count using the function provided by the driver
          */
-        return $collection->count(["_id"=>$mongoId])>0;
+        return $table->count(['id' => $id])>0;
     }
 
     /**
@@ -488,7 +478,7 @@ abstract class RethinkdbCollection extends PhalconCollection implements Unserial
         $result = $collection->insert($data, ['writeConcern' => new WriteConcern(1)]);
         if ($result instanceof InsertOneResult && $result->getInsertedId()) {
             $success = true;
-            $this->_id = $result->getInsertedId();
+            $this->id = $result->getInsertedId();
         }
 
         /**
