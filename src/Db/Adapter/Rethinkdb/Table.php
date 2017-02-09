@@ -512,18 +512,13 @@ class Table
      *
      * @param array|object $document The document to insert
      * @param array        $options  Command options [Optional]
-     * @return InsertOneResult
+     * @return string
      */
     public function insertOne($document, array $options = [])
     {
-        if (!isset($options['writeConcern'])) {
-            $options['writeConcern'] = $this->writeConcern;
-        }
+        $operation = new Operation\InsertOne($this->tableName, $document, $options);
 
-        $operation = new Operation\InsertOne($this->databaseName, $this->tableName, $document, $options);
-        $server    = $this->manager->selectServer(new ReadPreference(ReadPreference::RP_PRIMARY));
-
-        return $operation->execute($server);
+        return $operation->execute($this->manager);
     }
 
     /**
@@ -609,14 +604,9 @@ class Table
      */
     public function updateOne($filter, $update, array $options = [])
     {
-        if (!isset($options['writeConcern'])) {
-            $options['writeConcern'] = $this->writeConcern;
-        }
+        $operation = new Operation\UpdateOne($this->tableName, $filter, $update, $options);
 
-        $operation = new Operation\UpdateOne($this->databaseName, $this->tableName, $filter, $update, $options);
-        $server    = $this->manager->selectServer(new ReadPreference(ReadPreference::RP_PRIMARY));
-
-        return $operation->execute($server);
+        return $operation->execute($this->manager);
     }
 
     /**

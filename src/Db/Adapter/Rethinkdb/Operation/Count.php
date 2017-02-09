@@ -14,7 +14,6 @@ use Phalcon\Db\Adapter\RethinkDB\Functions;
  */
 class Count implements Executable
 {
-    private $databaseName;
     private $tableName;
     private $filter;
     private $options;
@@ -42,7 +41,6 @@ class Count implements Executable
      *  * skip (integer): The number of documents to skip before returning the
      *    documents.
      *
-     * @param string       $databaseName Database name
      * @param string       $tableName Table name
      * @param array|object $filter Query by which to filter documents
      * @param array        $options Command options
