@@ -234,14 +234,21 @@ die();
             throw new Exception("Method getSource() returns empty string");
         }
 
-        /**
-         * @var \Phalcon\Db\Adapter\RethinkDB\Table $rethinkdbTable
-         */
-        $rethinkdbTable = $connection->selectTable($source);
+//        /**
+//         * @var \Phalcon\Db\Adapter\RethinkDB\Table $rethinkdbTable
+//         */
+//        $rethinkdbTable = $connection->selectTable($source);
+//
+//        if (!is_object($rethinkdbTable)) {
+//            throw new Exception("Couldn't select mongo collection");
+//        }
 
-        if (!is_object($rethinkdbTable)) {
-            throw new Exception("Couldn't select mongo collection");
-        }
+	    /**
+	     * Everything below here appears to be correct and complete.
+	     * Just above here to complete.
+	     *
+	     * $rethinkdbTable needs declaring somehow.
+	     */
 
         $conditions = [];
 
@@ -272,12 +279,12 @@ die();
         }
 
         /**
-         * Check if a "sort" clause was defined
+         * Check if a "orderby" clause was defined
          */
-        if (isset($params['sort'])) {
-            $sort = $params["sort"];
+        if (isset($params['orderby'])) {
+	        $orderby = $params["orderby"];
 
-            $options['sort'] = $sort;
+            $options['orderby'] = $orderby;
         }
 
         /**
@@ -300,31 +307,28 @@ die();
         /**
          * Perform the find
          */
-        $cursor = $rethinkdbTable->find($conditions, $options);
-
-        $cursor->setTypeMap(['root'=>get_called_class(),'document'=>'object']);
+	    $tableRows = $rethinkdbTable->find($conditions, $options);
 
         if (true === $unique) {
             /**
              * Looking for only the first result.
              */
-            return current($cursor->toArray());
+            return current($tableRows->toArray());
         }
 
         /**
          * Requesting a complete resultset
          */
-        $collections = [];
+	    $results = [];
 
-
-        foreach ($cursor as $document) {
+        foreach ($tableRows as $document) {
             /**
              * Assign the values to the base object
              */
-            $collections[] = $document;
+            $results[] = $document;
         }
 
-        return $collections;
+        return $results;
     }
 
     /**
